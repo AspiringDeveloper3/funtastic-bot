@@ -20,10 +20,13 @@ function makeUser(msg) {
 
 const mongoose = require("mongoose");
 
-mongoose.connect("mongodb://localhost:27017/botDB", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(
+  "mongodb+srv://admin-vedant:Vedant7126@funtastic-bot.quavu.mongodb.net/botDB?retryWrites=true&w=majority",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
 
 const userSchema = new mongoose.Schema({
   userId: String,
