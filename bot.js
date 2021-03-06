@@ -279,31 +279,7 @@ client.on("message", (msg) => {
   if (msg.content === "-pokehunt") {
     const index = Math.floor(Math.random() * pokemons.length);
     const pokemon = pokemons[index];
-    switch (pokemon.type) {
-      case "Common":
-        msg.reply(`You caught a COMMON pokemon, **${pokemon.name}** 🙂`);
-        break;
-      case "Rare":
-        msg.reply(`You caught a RARE pokemon, **${pokemon.name}** 😃`);
-        break;
-      case "Legendary":
-        msg.reply(`You caught a LEGENDARY pokemon, **${pokemon.name}** 🥳`);
-        break;
-      case "Epic":
-        msg.reply(`You caught an EPIC pokemon, **${pokemon.name}** 🤩`);
-        break;
-      case "Mega-Legendary":
-        msg.reply(
-          `You caught a MEGA-LEGENDARY pokemon, **${pokemon.name}** 😱`
-        );
-        break;
-      case "Nothing":
-        msg.reply("lol u got **nothing**. Try again!");
-        break;
 
-      default:
-        break;
-    }
     User.findOne({ userId: msg.author.id }, (err, res) => {
       if (err) console.log(err);
       else {
@@ -311,8 +287,33 @@ client.on("message", (msg) => {
           makeUser(msg);
           msg.reply(trymsg);
         } else if (pokemon.name === "Nothing") {
+          msg.reply("lol, u got nothing. Try again!");
           return;
         } else {
+          switch (pokemon.type) {
+            case "Common":
+              msg.reply(`You caught a COMMON pokemon, **${pokemon.name}** 🙂`);
+              break;
+            case "Rare":
+              msg.reply(`You caught a RARE pokemon, **${pokemon.name}** 😃`);
+              break;
+            case "Legendary":
+              msg.reply(
+                `You caught a LEGENDARY pokemon, **${pokemon.name}** 🥳`
+              );
+              break;
+            case "Epic":
+              msg.reply(`You caught an EPIC pokemon, **${pokemon.name}** 🤩`);
+              break;
+            case "Mega-Legendary":
+              msg.reply(
+                `You caught a MEGA-LEGENDARY pokemon, **${pokemon.name}** 😱`
+              );
+              break;
+
+            default:
+              break;
+          }
           res.pokedex.push(pokemon.name);
           res.save();
         }
