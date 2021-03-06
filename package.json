@@ -1,0 +1,26 @@
+{
+  "name": "funtastic-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "dependencies": {
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "lodash": "^4.17.21",
+    "mongoose": "^5.11.18"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AspiringDeveloper3/funtastic-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AspiringDeveloper3/funtastic-bot/issues"
+  },
+  "homepage": "https://github.com/AspiringDeveloper3/funtastic-bot#readme"
+}
