@@ -7,11 +7,12 @@
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "lodash": "^4.17.21",
-    "mongoose": "^5.11.18"
+    "mongoose": "^5.11.18",
+    "tonic-js": "^1.0.6"
   },
   "devDependencies": {},
   "scripts": {
-    "start": "node bot.js"
+    "start": "nodemon bot.js"
   },
   "repository": {
     "type": "git",
