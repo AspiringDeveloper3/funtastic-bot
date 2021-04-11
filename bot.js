@@ -1,7 +1,6 @@
 require("dotenv").config();
 const _ = require("lodash");
 const discord = require("discord.js");
-const tonic = require("tonic-js");
 const client = new discord.Client({
   partials: ["MESSAGE", "REACTION"],
 });
@@ -15,12 +14,13 @@ function makeUser(msg) {
     xp: 0,
     level: 0,
     inv: [],
+    credits: 0,
   });
   newUser.save();
 }
 
 const mongoose = require("mongoose");
-const { filter, random } = require("lodash");
+const { filter } = require("lodash");
 
 mongoose.connect(
   "mongodb+srv://admin-vedant:Vedant7126@funtastic-bot.quavu.mongodb.net/botDB?retryWrites=true&w=majority",
@@ -38,6 +38,7 @@ const userSchema = new mongoose.Schema({
   xp: Number,
   level: Number,
   inv: [],
+  credits: Number,
 });
 
 const User = mongoose.model("user", userSchema);
@@ -464,12 +465,6 @@ client.on("message", (msg) => {
       if (err) {
         console.log(err);
       } else {
-        if (result.level > 0) {
-          for (let i = 0; i < result.level; i++) {
-            result.inv.push("Pokefood");
-          }
-          result.save();
-        }
         if (!result) {
           makeUser(msg);
           msg.reply(trymsg);
@@ -501,20 +496,25 @@ client.on("message", (msg) => {
   if (msg.content.startsWith("-kittysell")) {
     const split = msg.content.split(" ");
     let xp;
+    let credits;
     kitties.forEach((kitty) => {
       if (kitty.name === _.capitalize(split[1])) {
         switch (kitty.type) {
           case "Common":
             xp = 25;
+            credits = 30;
             break;
           case "Rare":
             xp = 65;
+            credits = 100;
             break;
           case "Epic":
             xp = 90;
+            credits = 175;
             break;
           case "Legendary":
             xp = 150;
+            credits = 250;
             break;
 
           default:
@@ -541,6 +541,7 @@ client.on("message", (msg) => {
                 if (index > -1) {
                   res.kittens.splice(index, 1);
                   res.xp += xp;
+                  res.credits += credits;
                   res.save();
                   break;
                 }
@@ -623,8 +624,9 @@ client.on("message", (msg) => {
             makeUser(msg);
             msg.reply(trymsg);
           } else {
-            msg.reply(`${res.username}'s inventory : -
-            ${res.inv}`);
+            msg.reply(
+              `${res.username}'s inventory : -\nCredits - 💵 ${res.credits}`
+            );
           }
         }
       });
@@ -637,7 +639,7 @@ client.on("message", (msg) => {
             msg.reply(trymsg);
           } else {
             msg.reply(`${result.username}'s inventory : -
-              ${result.inv}`);
+Credits - 💵 ${result.credits}`);
           }
         }
       });
@@ -689,32 +691,46 @@ client.on("message", (msg) => {
           msg.reply("lol, u got nothing. Try again!");
           return;
         } else {
-          switch (pokemon.type) {
-            case "Common":
-              msg.reply(`You caught a COMMON pokemon, **${pokemon.name}** 🙂`);
-              break;
-            case "Rare":
-              msg.reply(`You caught a RARE pokemon, **${pokemon.name}** 😃`);
-              break;
-            case "Legendary":
-              msg.reply(
-                `You caught a LEGENDARY pokemon, **${pokemon.name}** 🥳`
-              );
-              break;
-            case "Epic":
-              msg.reply(`You caught an EPIC pokemon, **${pokemon.name}** 🤩`);
-              break;
-            case "Mega-Legendary":
-              msg.reply(
-                `You caught a MEGA-LEGENDARY pokemon, **${pokemon.name}** 😱`
-              );
-              break;
+          for (var i = 0; i < res.inv.length; i++) {
+            const value = res.inv[i];
 
-            default:
-              break;
+            if (value === "Pokeball") {
+              switch (pokemon.type) {
+                case "Common":
+                  msg.reply(
+                    `You caught a COMMON pokemon, **${pokemon.name}** 🙂`
+                  );
+                  break;
+                case "Rare":
+                  msg.reply(
+                    `You caught a RARE pokemon, **${pokemon.name}** 😃`
+                  );
+                  break;
+                case "Legendary":
+                  msg.reply(
+                    `You caught a LEGENDARY pokemon, **${pokemon.name}** 🥳`
+                  );
+                  break;
+                case "Epic":
+                  msg.reply(
+                    `You caught an EPIC pokemon, **${pokemon.name}** 🤩`
+                  );
+                  break;
+                case "Mega-Legendary":
+                  msg.reply(
+                    `You caught a MEGA-LEGENDARY pokemon, **${pokemon.name}** 😱`
+                  );
+                  break;
+
+                default:
+                  break;
+              }
+              res.pokedex.push(pokemon.name);
+              res.save();
+            } else if (i === res.inv.length - 1) {
+              console.log("not there");
+            }
           }
-          res.pokedex.push(pokemon.name);
-          res.save();
         }
       }
     });
@@ -723,23 +739,29 @@ client.on("message", (msg) => {
   if (msg.content.startsWith("-pokesell")) {
     const split = msg.content.split(" ");
     let xp;
+    let credits;
     pokemons.forEach((pokemon) => {
       if (pokemon.name === _.capitalize(split[1])) {
         switch (pokemon.type) {
           case "Common":
             xp = 40;
+            credits = 50;
             break;
           case "Rare":
             xp = 105;
+            credits = 125;
             break;
           case "Epic":
             xp = 150;
+            credits = 200;
             break;
           case "Legendary":
             xp = 200;
+            credits = 400;
             break;
           case "Mega-Legendary":
             xp = 300;
+            credits = 700;
             break;
 
           default:
@@ -762,10 +784,13 @@ client.on("message", (msg) => {
               const element = res.pokedex[i];
               const index = res.pokedex.indexOf(_.capitalize(split[1]));
               if (element === _.capitalize(split[1])) {
-                msg.reply(`You sold ${split[1]} for ${xp} xp!`);
+                msg.reply(
+                  `You sold ${split[1]} for ${xp} xp & ${credits} coins!`
+                );
                 if (index > -1) {
                   res.pokedex.splice(index, 1);
                   res.xp += xp;
+                  res.credits += credits;
                   res.save();
                   break;
                 }
@@ -931,52 +956,6 @@ client.on("message", (msg) => {
     }
   }
 
-  if (msg.content.startsWith("-pokebattle")) {
-    const split = msg.content.split(" ");
-    const userPokemon = split[2];
-    const mention = msg.mentions.users.first();
-
-    if (!mention) {
-      msg.reply(
-        "Who do you want to challenge?\nThe correct format is\n*-pokebattle <who you want to challenge> <your pokemon>*"
-      );
-    } else if (!userPokemon) {
-      msg.reply(
-        "Which pokemon do you want to choose 🙄.\nThe correct format is\n*-pokebattle <who you want to challenge> <your pokemon>* "
-      );
-    }
-    User.findOne({ userId: msg.author.id }, (err, result) => {
-      if (err || !result) {
-        msg.reply(trymsg);
-        makeUser(msg);
-      } else {
-        for (let i = 0; i < result.pokedex.length; i++) {
-          const value = result.pokedex[i];
-          if (value.toLowerCase() === userPokemon.toLowerCase()) {
-            msg.reply("You have this");
-            msg.channel
-              .send(mention.toString() + " what is your pokemon?")
-              .then(() => {
-                msg.channel
-                  .awaitMessages(filter, {
-                    max: 1,
-                    time: 30000,
-                    errors: ["time"],
-                  })
-                  .then((message) => {
-                    message = message.first();
-                    msg.reply(message);
-                  });
-              });
-          } else if (i === result.pokedex.length - 1) {
-            msg.reply("Nothing");
-            return;
-          }
-        }
-      }
-    });
-  }
-
   if (msg.content.startsWith("-spin")) {
     const names = msg.content.split(" ").slice(1, msg.content.length);
 
@@ -1015,6 +994,57 @@ client.on("message", (msg) => {
         });
       }, 300);
     });
+  }
+
+  if (msg.content.startsWith("-shop")) {
+    const shopItems = [
+      {
+        name: "PC",
+        cost: 5000,
+        description:
+          "An item used to postmemes and also to showoff. Useful for earning tons of money!",
+        emoji: "💻",
+      },
+      {
+        name: "Fishing Pole",
+        cost: 3500,
+        emoji: "🎣",
+        description:
+          "An item used to fish, not for showoff though. Useful to catch fish, not for eating though.",
+      },
+      {
+        name: "Gun",
+        cost: 2000,
+        description:
+          "Pretty much speaks for itself, it is used to kill the other person and steal all money. It can only be blocked by a shield.",
+        emoji: "🔫",
+      },
+      {
+        name: "Shield",
+        cost: 2500,
+        description:
+          "An item used to defend against kill attacks. Made of sturdy ceramic, not for show-off though",
+        emoji: "🛡",
+      },
+      {
+        name: "Pokeball",
+        cost: 500,
+        description:
+          "An item used to catch pokemons. Essential to use the command <-pokehunt>.",
+        emoji: "🥎",
+      },
+    ];
+    const embed = new discord.MessageEmbed()
+      .setTitle("Shop")
+      .setDescription("Here are items")
+      .setColor("#0e6efe");
+    shopItems.forEach((item) => {
+      embed.addField(
+        `${item.emoji} Item - ${item.name}`,
+        `\n*${item.description}*\nCost -${item.cost}`
+      );
+    });
+    msg.channel.send(embed);
   }
 });
 
